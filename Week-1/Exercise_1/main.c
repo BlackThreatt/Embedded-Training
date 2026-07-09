@@ -19,11 +19,10 @@ int main(void) {
 
 void *mem_set(void *s, int c, size_t n) {
   unsigned char *s_ptr = s;
-  unsigned char t = (unsigned char)c;
 
-  for (uint32_t iter = 0; iter < n; iter++) {
-    s_ptr[iter] = t;
-  }
+  while (n--)
+    *s_ptr++ = (unsigned char)c;
+
   return s;
 }
 
