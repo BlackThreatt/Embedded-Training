@@ -23,11 +23,6 @@ typedef struct {
 #define GPIOA ((GPIO_Typedef *)GPIO_Base)
 
 typedef struct {
-  GPIO_Typedef *regs;
-  uint8_t is_initialized;
-} GPIO_Handle_t;
-
-typedef struct {
   uint8_t mode;
   uint8_t otype;
   uint8_t speed;
@@ -37,10 +32,10 @@ typedef struct {
   uint16_t pins;
 } GPIO_Config_t;
 
-uint32_t GPIO_Pin_Write(GPIO_Handle_t *hgpio, uint32_t pin_number,
+uint32_t GPIO_Pin_Write(GPIO_Typedef *GPIOx, uint32_t pin_number,
                         uint32_t pin_state);
-uint32_t GPIO_Pin_Read(GPIO_Handle_t *hgpio, uint32_t pin_number);
-uint32_t GPIO_Set_Config(GPIO_Handle_t *hgpio, GPIO_Config_t *conf);
-uint32_t GPIO_Get_Config(GPIO_Handle_t *hgpio, GPIO_Config_t *conf,
+uint32_t GPIO_Pin_Read(GPIO_Typedef *igpi, uint32_t pin_number);
+uint32_t GPIO_Set_Config(GPIO_Typedef *GPIOx, GPIO_Config_t *conf);
+uint32_t GPIO_Get_Config(GPIO_Typedef *GPIOx, GPIO_Config_t *conf,
                          uint8_t pin_number);
 #endif // __GPIO_H__
