@@ -1,7 +1,16 @@
 #ifndef __GPIO_H__
 #define __GPIO_H__
 #include <stdint.h>
-#include <sys/types.h>
+
+#define SET_BIT(reg, pos) ((reg) |= (1U << (pos)))
+#define CLEAR_BIT(reg, pos) ((reg) &= ~(1U << (pos)))
+#define TOGGLE_BIT(reg, pos) (((reg)) ^= (1U << (pos)))
+#define READ_BIT(reg, pos) (((reg) & (1U << (pos))) >> (pos))
+
+#define SET_BITS_MASK(reg, pos, mask) ((reg) |= ((mask) << (pos)))
+#define CLEAR_BITS_MASK(reg, pos, mask) ((reg) &= ~((mask) << (pos)))
+#define TOGGLE_BITS_MASK(reg, pos, mask) ((reg) ^= ((mask) << (pos)))
+#define READ_BITS_MASK(reg, pos, mask) (((reg) & ((mask) << (pos))) >> (pos))
 
 #define EXEC_OK 0x7F7F7F7F
 #define EXEC_ERR 0x5F5F5F5F
@@ -19,8 +28,10 @@ typedef struct {
   volatile uint32_t AFRH;
 } GPIO_Typedef;
 
-#define GPIO_Base (0x40020000UL)
-#define GPIOA ((GPIO_Typedef *)GPIO_Base)
+#define T_GPIO_BASE (0x40020000UL)
+#define T_GPIOA ((GPIO_Typedef *)T_GPIO_BASE)
+#define T_GPIOC ((GPIO_Typedef *)(T_GPIO_BASE + 0x0800UL))
+#define T_GPIOG ((GPIO_Typedef *)(T_GPIO_BASE + 0x1800UL))
 
 typedef struct {
   uint8_t mode;

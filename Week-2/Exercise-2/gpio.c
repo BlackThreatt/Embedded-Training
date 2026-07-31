@@ -1,15 +1,5 @@
 #include "gpio.h"
 
-#define SET_BIT(reg, pos) ((reg) |= (1U << (pos)))
-#define CLEAR_BIT(reg, pos) ((reg) &= ~(1U << (pos)))
-#define TOGGLE_BIT(reg, pos) (((reg)) ^= (1U << (pos)))
-#define READ_BIT(reg, pos) (((reg) & (1U << (pos))) >> (pos))
-
-#define SET_BITS_MASK(reg, pos, mask) ((reg) |= ((mask) << (pos)))
-#define CLEAR_BITS_MASK(reg, pos, mask) ((reg) &= ~((mask) << (pos)))
-#define TOGGLE_BITS_MASK(reg, pos, mask) ((reg) ^= ((mask) << (pos)))
-#define READ_BITS_MASK(reg, pos, mask) (((reg) & ((mask) << (pos))) >> (pos))
-
 uint32_t GPIO_Pin_Write(GPIO_Typedef *GPIOx, uint32_t pin_number,
                         uint32_t pin_state) {
   uint32_t tmpReg = 0U;
@@ -42,7 +32,6 @@ uint32_t GPIO_Pin_Read(GPIO_Typedef *GPIOx, uint32_t pin_number) {
 uint32_t GPIO_Set_Config(GPIO_Typedef *GPIOx, GPIO_Config_t *conf) {
 
   uint32_t tmpReg = 0U;
-  uint32_t mask = 0U;
 
   if (conf == (void *)0) {
     return EXEC_ERR;
@@ -55,7 +44,6 @@ uint32_t GPIO_Set_Config(GPIO_Typedef *GPIOx, GPIO_Config_t *conf) {
       tmpReg = GPIOx->MODER;
       CLEAR_BITS_MASK(tmpReg, iter * 2, 3U);
       SET_BITS_MASK(tmpReg, iter * 2, conf->mode);
-
       GPIOx->MODER = tmpReg;
 
       // set otype
@@ -68,27 +56,27 @@ uint32_t GPIO_Set_Config(GPIO_Typedef *GPIOx, GPIO_Config_t *conf) {
 
       // set speed
       tmpReg = GPIOx->OSPEEDR;
-      CLEAR_BITS_MASK(tmpReg, 3U, iter * 2);
-      SET_BITS_MASK(tmpReg, conf->speed, iter * 2);
+      CLEAR_BITS_MASK(tmpReg, iter * 2, 3U);
+      SET_BITS_MASK(tmpReg, iter * 2, conf->speed);
       GPIOx->OSPEEDR = tmpReg;
 
       // set pullup
       tmpReg = GPIOx->PUPDR;
-      CLEAR_BITS_MASK(tmpReg, 3U, iter * 2);
-      SET_BITS_MASK(tmpReg, conf->pullup, iter * 2);
+      CLEAR_BITS_MASK(tmpReg, iter * 2, 3U);
+      SET_BITS_MASK(tmpReg, iter * 2, conf->pullup);
       GPIOx->PUPDR = tmpReg;
 
       // set AFRL
       if (iter < 8) {
         tmpReg = GPIOx->AFRL;
         CLEAR_BITS_MASK(tmpReg, iter * 4, 15U);
-        SET_BITS_MASK(tmpReg, conf->AF_L, iter * 4);
+        SET_BITS_MASK(tmpReg, iter * 4, conf->AF_L);
         GPIOx->AFRL = tmpReg;
       } else {
         // set AFRH
         tmpReg = GPIOx->AFRH;
         CLEAR_BITS_MASK(tmpReg, (iter - 8) * 4, 15U);
-        SET_BITS_MASK(tmpReg, conf->AF_H, (iter - 8) * 4);
+        SET_BITS_MASK(tmpReg, (iter - 8) * 4, conf->AF_H);
         GPIOx->AFRH = tmpReg;
       }
     }
@@ -99,7 +87,6 @@ uint32_t GPIO_Set_Config(GPIO_Typedef *GPIOx, GPIO_Config_t *conf) {
 uint32_t GPIO_Get_Config(GPIO_Typedef *GPIOx, GPIO_Config_t *conf,
                          uint8_t pin_number) {
   uint32_t tmpReg = 0U;
-  uint32_t mask = 0U;
   if ((pin_number > 15) || (conf == (void *)0)) {
     return EXEC_ERR;
   }
@@ -138,3 +125,4 @@ uint32_t GPIO_Get_Config(GPIO_Typedef *GPIOx, GPIO_Config_t *conf,
   }
   return EXEC_OK;
 }
+
