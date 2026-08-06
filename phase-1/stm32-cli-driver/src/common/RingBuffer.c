@@ -1,35 +1,37 @@
 #include "RingBuffer.h"
 
-uint8_t is_rb_empty(RingBuffer_t *rb) {
-  if (rb->head == rb->tail) {
-    return True; // list is empty
-  }
-  return False;
+void RingBuf_Init(RingBuffer_t *rb) {
+  rb->head = 0;
+  rb->tail = 0;
 }
-uint8_t is_rb_full(RingBuffer_t *rb) {
-  uint32_t next = (rb->head + 1U) & RING_BUF_MASK;
-  if (next == rb->tail) {
-    return True;
+
+bool RingBuf_Push(RingBuffer_t *rb, uint8_t element) {
+  uint32_t head = rb->head;
+  if ((head - rb->tail) >= RING_BUF_SIZE) {
+    return false; /* full */
   }
-  return False;
+  rb->buf[head & RING_BUF_MASK] = element;
+  rb->head = head + 1U;
+  return true;
 }
-uint8_t rb_push(RingBuffer_t *rb, uint8_t element) {
-  if (is_rb_full(rb)) {
-    return False;
+
+bool RingBuf_Pop(RingBuffer_t *rb, uint8_t *element) {
+  uint32_t tail = rb->tail;
+  if (rb->head == tail) {
+    return false; /* empty */
   }
-  int32_t next = (rb->head + 1U) & RING_BUF_MASK;
-  rb->buf[rb->head] = element;
-  rb->head = next;
-  return True;
+  *element = rb->buf[tail & RING_BUF_MASK];
+  rb->tail = tail + 1U;
+  return true;
 }
-uint8_t rb_pop(RingBuffer_t *rb, uint8_t *element) {
-  if (is_rb_empty(rb)) {
-    return False;
-  }
-  *element = rb->buf[rb->tail];
-  rb->tail = (rb->tail + 1U) & RING_BUF_MASK;
-  return True;
+uint32_t RingBuf_Count(const RingBuffer_t *rb) {
+  return rb->head - rb->tail; 
 }
-uint8_t rb_count(const RingBuffer_t *rb) {
-  return ((rb->head - rb->tail) & RING_BUF_MASK);
+
+bool RingBuf_IsEmpty(const RingBuffer_t *rb) {
+  return rb->head == rb->tail; 
+}
+
+bool RingBuf_IsFull(const RingBuffer_t *rb) {
+  return (rb->head - rb->tail) >= RING_BUF_SIZE;
 }

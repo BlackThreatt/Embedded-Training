@@ -1,24 +1,26 @@
-#ifndef __RINGBUFFER_H_
-#define __RINGBUFFER_H_
+#ifndef RING_BUFFER_H
+#define RING_BUFFER_H
 
+#include <stdbool.h>
 #include <stdint.h>
 
-#define True (1U)
-#define False (0U)
+#define RING_BUF_SIZE (256U) /* must be power of 2 */
+#define RING_BUF_MASK (RING_BUF_SIZE - 1U)
 
-#define RING_BUF_SIZE (256U)
-#define RING_BUF_MASK ((RING_BUF_SIZE) - 1U)
+_Static_assert((RING_BUF_SIZE & RING_BUF_MASK) == 0u,
+               "RING_BUF_SIZE must be a power of two");
 
 typedef struct {
-  uint8_t buf[RING_BUF_SIZE];
+  volatile uint8_t buf[RING_BUF_SIZE];
   volatile uint32_t head;
   volatile uint32_t tail;
 } RingBuffer_t;
 
-uint8_t is_rb_empty(RingBuffer_t *rb);
-uint8_t is_rb_full(RingBuffer_t *rb);
-uint8_t rb_push(RingBuffer_t *rb, uint8_t element);
-uint8_t rb_pop(RingBuffer_t *rb, uint8_t *element);
-uint8_t rb_count(const RingBuffer_t *rb);
+void RingBuf_Init(RingBuffer_t *rb);
+bool RingBuf_Push(RingBuffer_t *rb, uint8_t element);
+bool RingBuf_Pop(RingBuffer_t *rb, uint8_t *element);
+uint32_t RingBuf_Count(const RingBuffer_t *rb);
+bool RingBuf_IsEmpty(const RingBuffer_t *rb);
+bool RingBuf_IsFull(const RingBuffer_t *rb);
 
-#endif // !__RINGBUFFER_H_
+#endif /* RING_BUFFER_H */
