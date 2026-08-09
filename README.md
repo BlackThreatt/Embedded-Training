@@ -4,7 +4,7 @@ This is my personal training repository containing a structured full-time curric
  
 Each phase lives in its own folder. Phases 1 and 2 contain weekly exercise folders for isolated concept work. From Phase 3 onward, all work lives in a single evolving `project/` named after the capstone and grows into it eventually.
  
-The companion site documenting the full curriculum from weekly breakdowns, code references, hardware BOM, and interview prep can be found it at **[blackthreatt.github.io/embedded-training](https://blackthreatt.github.io/embedded-training)**.
+The companion site documenting the full curriculum from weekly breakdowns, code references, hardware BOM, and interview prep can be found it at **[BlackThreatt.github.io](https://blackthreatt.github.io)**.
  
 ---
 
