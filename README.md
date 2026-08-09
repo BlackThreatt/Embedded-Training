@@ -12,32 +12,34 @@ The companion site documenting the full curriculum from weekly breakdowns, code 
  
 ```
 embedded-training/
-  phase1/                     ← Foundations (6 weeks)
+  phase-1/                     ← Foundations (6 weeks)
     week1/                    ← Exercises: pointers, memory model, UB
     week2/                    ← Exercises: volatile, layered UART driver
     stm32-cli-driver/         ← Evolving codebase from week 3 → capstone
       Makefile
       README.md
  
-  phase2/                     ← RTOS and real-time design (8 weeks)
+  phase-2/                     ← RTOS and real-time design (8 weeks)
     project/
       Makefile
       README.md
  
-  phase3/                     ← Bootloader design (9 weeks)
+  phase-3/                     ← Bootloader design (9 weeks)
     project/ 
       Makefile
       README.md
  
-  phase4/                     ← CAN bus and automotive protocols (9 weeks)
+  phase-4/                     ← CAN bus and automotive protocols (9 weeks)
     project/
       Makefile
       README.md
  
-  phase5/                     ← Professional readiness (5 weeks)
+  phase-5/                     ← Professional readiness (5 weeks)
     README.md
+  
+  LICENSE
+  README.md
 ```
-
 ---
 
 ## Build 
@@ -48,7 +50,7 @@ Every phase project contains a `Makefile` used to ease the compilation with `arm
  
 ## Related
  
-- **Curriculum site:** [blackthreatt.github.io/embedded-training](https://blackthreatt.github.io/embedded-training) contains full week-by-week breakdown, code reference, hardware BOM...
+- **Curriculum site:** [BlackThreatt.Github.io](https://blackthreatt.github.io) contains full week-by-week breakdown, code reference, hardware BOM...
 - **Blog:** This is where you will find technical posts I publish from each phase: documenting encountered concepts, bugs, or tips and tricks...
 
 ---
