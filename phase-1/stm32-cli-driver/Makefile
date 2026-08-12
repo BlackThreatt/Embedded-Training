@@ -30,7 +30,6 @@ INCLUDE_DIRS = \
 							src/app \
 							src/common \
 							src/drivers \
-							src/test \
 							external/STM32F4xx_HAL_Driver/Inc \
 							external/STM32F4xx_HAL_Driver/Inc/Legacy \
 							external/CMSIS/Include \
