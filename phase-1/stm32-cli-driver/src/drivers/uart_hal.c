@@ -16,6 +16,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "uart_hal.h"
+#include "stm32f429xx.h"
 /* Private typedef
  * ------------------------------------------------------------*/
 
@@ -54,7 +55,7 @@ void HAL_UART_Disable() { USART1->CR1 &= ~(USART_CR1_UE); }
  * @param  wordlength Word length setting (8 or 9 bits).
  * @retval None
  */
-void HAL_UART_SetWordLength(UART_WordLength_t wordlength) {
+void HAL_UART_SetWordLength(UART_WordLength wordlength) {
   switch (wordlength) {
   case UART_WORDLENGTH_8B:
     USART1->CR1 &= ~(USART_CR1_M);
@@ -71,7 +72,7 @@ void HAL_UART_SetWordLength(UART_WordLength_t wordlength) {
  * @param  stop  Stop bits setting.
  * @retval None
  */
-void HAL_UART_SetStopBits(UART_StopBits_t stop) {
+void HAL_UART_SetStopBits(UART_StopBits stop) {
 
   switch (stop) {
   case UART_STOPBITS_1:
@@ -117,7 +118,7 @@ void HAL_UART_SetBaudRate(uint32_t pclk, uint32_t baud) {
  * @param  parity Parity setting.
  * @retval None
  */
-void HAL_UART_SetParity(UART_Parity_t parity) {
+void HAL_UART_SetParity(UART_Parity parity) {
 
   switch (parity) {
   case UART_PARITY_NONE:
@@ -229,7 +230,7 @@ uint8_t HAL_UART_ReadByte() { return (USART1->DR & 0xFF); }
  * @param  mode  Direction mode setting.
  * @retval None
  */
-void HAL_UART_SetMode(UART_Mode_t mode) {
+void HAL_UART_SetMode(UART_Mode mode) {
   switch (mode) {
   case UART_MODE_TX:
     USART1->CR1 |= USART_CR1_TE;
@@ -252,7 +253,7 @@ void HAL_UART_SetMode(UART_Mode_t mode) {
  * @param  oversampling Oversampling setting (8x or 16x).
  * @retval None
  */
-void HAL_UART_SetOversampling(UART_Oversampling_t oversampling) {
+void HAL_UART_SetOversampling(UART_Oversampling oversampling) {
   switch (oversampling) {
   case UART_OVERSAMPLING_8:
     USART1->CR1 |= USART_CR1_OVER8;

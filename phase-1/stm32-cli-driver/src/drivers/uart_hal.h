@@ -21,7 +21,6 @@ extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
-#include "stm32f429xx.h"
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -35,7 +34,7 @@ typedef enum {
   UART_STOPBITS_0_5 = 1,
   UART_STOPBITS_2 = 2,
   UART_STOPBITS_1_5 = 3
-} UART_StopBits_t;
+} UART_StopBits;
 
 /**
  * @brief UART parity configuration options.
@@ -44,15 +43,12 @@ typedef enum {
   UART_PARITY_NONE = 0,
   UART_PARITY_EVEN = 1,
   UART_PARITY_ODD = 2,
-} UART_Parity_t;
+} UART_Parity;
 
 /**
  * @brief UART word length configuration options.
  */
-typedef enum {
-  UART_WORDLENGTH_8B = 0,
-  UART_WORDLENGTH_9B = 1
-} UART_WordLength_t;
+typedef enum { UART_WORDLENGTH_8B = 0, UART_WORDLENGTH_9B = 1 } UART_WordLength;
 
 /**
  * @brief UART oversampling configuration options.
@@ -60,17 +56,7 @@ typedef enum {
 typedef enum {
   UART_OVERSAMPLING_8 = 0,
   UART_OVERSAMPLING_16 = 1
-} UART_Oversampling_t;
-
-/**
- * @brief UART hardware flow control configuration options.
- */
-typedef enum {
-  UART_HWCONTROL_NONE = 0,
-  UART_HWCONTROL_RTS = 1,
-  UART_HWCONTROL_CTS = 2,
-  UART_HWCONTROL_RTS_CTS = 3
-} UART_FlowControl_t;
+} UART_Oversampling;
 
 /**
  * @brief UART direction mode configuration options.
@@ -79,7 +65,7 @@ typedef enum {
   UART_MODE_TX = 0,
   UART_MODE_RX = 1,
   UART_MODE_TX_RX = 2
-} UART_Mode_t;
+} UART_Mode;
 
 /* Exported constants --------------------------------------------------------*/
 
@@ -148,14 +134,14 @@ void HAL_UART_Disable();
  * @param  wordlength Word length setting (8 or 9 bits).
  * @retval None
  */
-void HAL_UART_SetWordLength(UART_WordLength_t wordlength);
+void HAL_UART_SetWordLength(UART_WordLength wordlength);
 /**
  * @brief  Configures the USART stop bits.
  * @param  usart Pointer to the USART peripheral register block.
  * @param  stop  Stop bits setting.
  * @retval None
  */
-void HAL_UART_SetStopBits(UART_StopBits_t stop);
+void HAL_UART_SetStopBits(UART_StopBits stop);
 /**
  * @brief  Configures the USART baud rate.
  * @param  usart Pointer to the USART peripheral register block.
@@ -171,7 +157,7 @@ void HAL_UART_SetBaudRate(uint32_t pclk, uint32_t baud);
  * @param  parity Parity setting.
  * @retval None
  */
-void HAL_UART_SetParity(UART_Parity_t parity);
+void HAL_UART_SetParity(UART_Parity parity);
 
 /**
  * @brief  Enables one or more USART interrupt sources.
@@ -213,14 +199,14 @@ uint8_t HAL_UART_ReadByte();
  * @param  mode  Direction mode setting.
  * @retval None
  */
-void HAL_UART_SetMode(UART_Mode_t mode);
+void HAL_UART_SetMode(UART_Mode mode);
 /**
  * @brief  Configures the USART oversampling rate.
  * @param  usart        Pointer to the USART peripheral register block.
  * @param  oversampling Oversampling setting (8x or 16x).
  * @retval None
  */
-void HAL_UART_SetOversampling(UART_Oversampling_t oversampling);
+void HAL_UART_SetOversampling(UART_Oversampling oversampling);
 /**
  * @brief  Checks whether TXE flag is set.
  * @param  usart Pointer to the USART peripheral register block.
