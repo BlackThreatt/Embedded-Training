@@ -13,7 +13,6 @@
  ******************************************************************************
  */
 
-/* Define to prevent recursive inclusion -----------------------------------*/
 #ifndef UART_HAL_H
 #define UART_HAL_H
 

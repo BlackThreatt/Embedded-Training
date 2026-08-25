@@ -20,29 +20,22 @@
 #include "gpio.h"
 #include "uart_hal.h"
 #include <stddef.h>
-/* Private typedef
- * ------------------------------------------------------------*/
+/* Private typedef -----------------------------------------------------------*/
 
-/* Private define
- * --------------------------------------------------------------*/
+/* Private define ------------------------------------------------------------*/
 
-/* Private macro
- * ----------------------------------------------------------------*/
+/* Private macro -------------------------------------------------------------*/
 
-/* Private variables
- * --------------------------------------------------------------*/
-// BUG: can't use multiple USART instances since they share ringbuffers
+/* Private variables ---------------------------------------------------------*/
 static RingBuffer_t
     uartRxRb; /*!< RX ring buffer for the active USART instance */
 static RingBuffer_t
     uartTxRb; /*!< TX ring buffer for the active USART instance */
 
 GPIO_Config_t uartGpioConf;
-/* Private function prototypes
- * ----------------------------------------------------*/
+/* Private function prototypes -----------------------------------------------*/
 
-/* Exported functions
- * --------------------------------------------------------------*/
+/* Exported functions --------------------------------------------------------*/
 
 /**
  * @brief  Initializes a USART peripheral and its RX/TX ring buffers.
@@ -147,5 +140,5 @@ void USART1_IRQHandler(void) {
   }
 }
 
-/* Private functions
- * -----------------------------------------------------------------*/
+/* Private functions --------------------------------------------------------*/
+
