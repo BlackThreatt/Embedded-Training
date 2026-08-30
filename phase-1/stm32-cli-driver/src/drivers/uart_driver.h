@@ -30,12 +30,12 @@ extern "C" {
  * @brief UART driver configuration structure passed to UART_DRV_Init().
  */
 typedef struct {
-  uint32_t baudrate;                /*!< Desired baud rate in bits per second */
-  UART_WordLength_t word_length;    /*!< UART_WORDLEN_8B / 9B */
-  UART_Parity_t parity;             /*!< UART_PARITY_NONE / ODD / EVEN */
-  UART_StopBits_t stop_bits;        /*!< UART_STOPBITS_1 / 2 */
-  UART_Oversampling_t oversampling; /*!< UART_OVERSAMPLING_8 / 16 */
-  UART_Mode_t mode;                 /*!< UART_MODE_TX / RX / TX_RX */
+  uint32_t baudrate;              /*!< Desired baud rate in bits per second */
+  UART_WordLength word_length;    /*!< UART_WORDLEN_8B / 9B */
+  UART_Parity parity;             /*!< UART_PARITY_NONE / ODD / EVEN */
+  UART_StopBits stop_bits;        /*!< UART_STOPBITS_1 / 2 */
+  UART_Oversampling oversampling; /*!< UART_OVERSAMPLING_8 / 16 */
+  UART_Mode mode;                 /*!< UART_MODE_TX / RX / TX_RX */
   uint8_t it_flags; /*!< UART_FLAG_PEIE / TXEIE / TCIE / RXNEIE / IDLEIE /
                           CTSIE / EIE / LBDIE */
 } USART_Config_t;

@@ -16,9 +16,9 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "uart_driver.h"
-#include "../common/RingBuffer.h"
-#include "gpio.h"
-#include "uart_hal.h"
+#include "RingBuffer.h"
+#include "board_config.h"
+#include "gpio_driver.h"
 #include <stddef.h>
 /* Private typedef -----------------------------------------------------------*/
 
@@ -32,7 +32,11 @@ static RingBuffer_t
 static RingBuffer_t
     uartTxRb; /*!< TX ring buffer for the active USART instance */
 
-GPIO_Config_t uartGpioConf;
+static GPIO_Pin_t uartTxPin = {.port = DEBUG_UART_TX_PORT,
+                               .pin = DEBUG_UART_TX_PIN};
+static GPIO_Pin_t uartRxPin = {.port = DEBUG_UART_RX_PORT,
+                               .pin = DEBUG_UART_RX_PIN};
+
 /* Private function prototypes -----------------------------------------------*/
 
 /* Exported functions --------------------------------------------------------*/
@@ -52,14 +56,16 @@ void UART_DRV_Init(USART_Config_t *conf) {
   // Enable USART1 Clock
   RCC->APB2ENR |= (1U << 4);
 
-  // Initialize UART gpio
-  uartGpioConf.pins = (1U << 9) | (1U << 10);
-  // Set mode to Alternate Function
-  uartGpioConf.mode = 2U;
-  // Set AF_H to AF7;
-  uartGpioConf.AF_H = 7U;
+  GPIO_Config_t uartPinConf = {
+      .mode = PIN_MODE_AF,
+      .otype = PIN_OTYPE_PP,
+      .speed = PIN_HIGH_SPEED,
+      .pullup = PIN_PULL_NO_PP,
+      .af = 7U, // AF7 = USART1 TX/RX on PA9/PA10
+  };
 
-  GPIO_Set_Config(T_GPIOA, &uartGpioConf);
+  GPIO_DRV_Init(&uartTxPin, &uartPinConf);
+  GPIO_DRV_Init(&uartRxPin, &uartPinConf);
 
   HAL_UART_SetWordLength(conf->word_length);
   HAL_UART_SetParity(conf->parity);
@@ -141,4 +147,3 @@ void USART1_IRQHandler(void) {
 }
 
 /* Private functions --------------------------------------------------------*/
-
