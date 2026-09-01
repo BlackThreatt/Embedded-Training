@@ -49,34 +49,40 @@ typedef struct {
 /**
  * @brief  Configures a GPIO pin according to the given configuration
  *         (mode, output type, speed, pull, alternate function).
- * @param  io Pointer to the GPIO pin/port identity to configure.
+ * @param  io   Pointer to the GPIO pin/port identity to configure.
  * @param  conf Pointer to a GPIO_Config_t describing the desired
  *              mode, output type, speed, pull, and alternate function.
- * @retval None
+ * @retval ERR_OK on success, ERR_NULL_PTR if io or conf is NULL,
+ *         or the first HAL error encountered.
  */
-void GPIO_DRV_Init(GPIO_Pin_t *io, GPIO_Config_t *conf);
+error_t GPIO_DRV_Init(GPIO_Pin_t *io, GPIO_Config_t *conf);
 
 /**
  * @brief  Sets or clears the output state of a single GPIO pin.
- * @param  io   Pointer to the GPIO pin identity to write to.
- * @param  state Desired pin state (0 = reset, non-zero = set).
- * @retval None
+ * @param  io    Pointer to the GPIO pin identity to write to.
+ * @param  state Desired pin state.
+ * @retval ERR_OK on success, ERR_NULL_PTR if io is NULL,
+ *         or the HAL error encountered.
  */
-void GPIO_DRV_Write(GPIO_Pin_t *io, GPIO_PinState state);
+error_t GPIO_DRV_Write(GPIO_Pin_t *io, GPIO_PinState state);
 
 /**
  * @brief  Reads the current input state of a single GPIO pin.
- * @param  io Pointer to the GPIO pin identity to read.
- * @retval Current state of the pin (set or reset).
+ * @param  io        Pointer to the GPIO pin identity to read.
+ * @param  out_state Pointer to where the pin state will be written.
+ * @retval ERR_OK on success, ERR_NULL_PTR if io or out_state is NULL,
+ *         or the HAL error encountered.
  */
-GPIO_PinState GPIO_DRV_Read(GPIO_Pin_t *io);
+error_t GPIO_DRV_Read(GPIO_Pin_t *io, GPIO_PinState *out_state);
 
 /**
  * @brief  Toggles the current output state of a single GPIO pin.
  * @param  io Pointer to the GPIO pin identity to toggle.
- * @retval None
+ * @retval ERR_OK on success, ERR_NULL_PTR if io is NULL,
+ *         or the HAL error encountered.
  */
-void GPIO_DRV_Toggle(GPIO_Pin_t *io);
+error_t GPIO_DRV_Toggle(GPIO_Pin_t *io);
+
 #ifdef __cplusplus
 }
 #endif
