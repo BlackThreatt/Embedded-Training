@@ -3,7 +3,7 @@
  * @file           : uart_driver.h
  * @brief          : Header file for uart_driver.c
  * @author         : Mohamed Ali BESSAIDI
- * @date           : 22 Aug 2026
+ * @date           : 1 Sept 2026
  ******************************************************************************
  * @attention
  *
@@ -20,56 +20,62 @@ extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
+#include "error.h"
 #include "uart_hal.h"
 #include <stdbool.h>
 #include <stddef.h>
 
 /* Exported types ------------------------------------------------------------*/
 
-/**
- * @brief UART driver configuration structure passed to UART_DRV_Init().
- */
 typedef struct {
-  uint32_t baudrate;              /*!< Desired baud rate in bits per second */
-  UART_WordLength word_length;    /*!< UART_WORDLEN_8B / 9B */
-  UART_Parity parity;             /*!< UART_PARITY_NONE / ODD / EVEN */
-  UART_StopBits stop_bits;        /*!< UART_STOPBITS_1 / 2 */
-  UART_Oversampling oversampling; /*!< UART_OVERSAMPLING_8 / 16 */
-  UART_Mode mode;                 /*!< UART_MODE_TX / RX / TX_RX */
-  uint8_t it_flags; /*!< UART_FLAG_PEIE / TXEIE / TCIE / RXNEIE / IDLEIE /
-                          CTSIE / EIE / LBDIE */
+  uint32_t baudrate;
+  UART_WordLength word_length;
+  UART_Parity parity;
+  UART_StopBits stop_bits;
+  UART_Oversampling oversampling;
+  UART_Mode mode;
+  uint8_t it_flags;
 } USART_Config_t;
 
 /* Exported constants --------------------------------------------------------*/
 
-/* Exported macros -----------------------------------------------------------*/
+/* Exported macros
+ * ------------------------------------------------------------*/
 
-/* Exported functions prototypes ---------------------------------------------*/
+#if defined(__GNUC__) || defined(__clang__)
+#define ERR_CHECK __attribute__((warn_unused_result))
+#else
+#define ERR_CHECK
+#endif
+
+/* Exported functions prototypes
+ * -----------------------------------------------*/
 
 /**
  * @brief  Initializes a USART peripheral and its RX/TX ring buffers.
- * @param[in]  conf  Pointer to a USART_Config_t configuration structure.
- * @retval None
+ * @param[in]  conf Pointer to a USART_Config_t configuration structure.
+ * @retval ERR_OK on success, ERR_NULL_PTR if conf is NULL, or the first
+ *         GPIO/HAL error encountered.
  */
-void UART_DRV_Init(USART_Config_t *conf);
+ERR_CHECK error_t UART_DRV_Init(USART_Config_t *conf);
 
 /**
- * @brief  Transmits a single byte over the given USART peripheral.
- * @param[in] conf  Pointer to a USART_Config_t configuration structure.
- * @param[in] byte  Poiner to bytes to transmit.
- * @param[in] len   Length of byte array to transmit.
- * @retval None
+ * @brief  Queues bytes for transmission over the debug USART.
+ * @param[in] byte Pointer to bytes to transmit.
+ * @param[in] len  Length of byte array to transmit.
+ * @retval ERR_OK if all bytes were queued, ERR_NULL_PTR if byte is NULL,
+ *         ERR_BUFFER_FULL if one or more bytes could not be queued.
  */
-void UART_DRV_Transmit(USART_Config_t *conf, const uint8_t *byte, size_t len);
+ERR_CHECK error_t UART_DRV_Transmit(const uint8_t *byte, size_t len);
 
 /**
- * @brief  Receives a single byte from the given USART peripheral.
- * @param[in] conf  Pointer to a USART_Config_t configuration structure.
+ * @brief  Reads bytes already received on the debug USART.
  * @param[out] data Pointer to where received data will be saved.
- * @param[in] len   Length of data to be read.
- * @retval None
+ * @param[in]  len  Length of data to be read.
+ * @retval ERR_OK if all bytes were read, ERR_NULL_PTR if data is NULL,
+ *         ERR_BUFFER_EMPTY if fewer than len bytes were available.
  */
-void UART_DRV_Receive(USART_Config_t *conf, uint8_t *data, size_t len);
+ERR_CHECK error_t UART_DRV_Receive(uint8_t *data, size_t len);
 
 /**
  * @brief  Defines Interrupt Service Routine

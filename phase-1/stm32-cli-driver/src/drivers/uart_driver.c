@@ -4,7 +4,7 @@
  * @brief          : Driver layer for USART peripherals, built on top of
  * uart_hal
  * @author         : Mohamed Ali BESSAIDI
- * @date           : 22 Aug 2026
+ * @date           : 1 Sept 2026
  ******************************************************************************
  * @attention
  *
@@ -20,6 +20,7 @@
 #include "board_config.h"
 #include "gpio_driver.h"
 #include <stddef.h>
+
 /* Private typedef -----------------------------------------------------------*/
 
 /* Private define ------------------------------------------------------------*/
@@ -27,26 +28,26 @@
 /* Private macro -------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
-static RingBuffer_t
-    uartRxRb; /*!< RX ring buffer for the active USART instance */
-static RingBuffer_t
-    uartTxRb; /*!< TX ring buffer for the active USART instance */
+static RingBuffer_t uartRxRb;
+static RingBuffer_t uartTxRb;
 
 static GPIO_Pin_t uartTxPin = {.port = DEBUG_UART_TX_PORT,
                                .pin = DEBUG_UART_TX_PIN};
 static GPIO_Pin_t uartRxPin = {.port = DEBUG_UART_RX_PORT,
                                .pin = DEBUG_UART_RX_PIN};
 
-/* Private function prototypes -----------------------------------------------*/
+/* Private function prototypes
+ * ------------------------------------------------*/
 
-/* Exported functions --------------------------------------------------------*/
+/* Exported functions
+ * ----------------------------------------------------------*/
 
-/**
- * @brief  Initializes a USART peripheral and its RX/TX ring buffers.
- * @param[in]  conf  Pointer to a USART_Config_t configuration structure.
- * @retval None
- */
-void UART_DRV_Init(USART_Config_t *conf) {
+error_t UART_DRV_Init(USART_Config_t *conf) {
+  error_t err;
+
+  if (conf == NULL) {
+    return ERR_NULL_PTR;
+  }
 
   RingBuf_Init(&uartRxRb);
   RingBuf_Init(&uartTxRb);
@@ -61,73 +62,100 @@ void UART_DRV_Init(USART_Config_t *conf) {
       .otype = PIN_OTYPE_PP,
       .speed = PIN_HIGH_SPEED,
       .pullup = PIN_PULL_NO_PP,
-      .af = 7U, // AF7 = USART1 TX/RX on PA9/PA10
+      .af = DEBUG_UART_AF,
   };
 
-  GPIO_DRV_Init(&uartTxPin, &uartPinConf);
-  GPIO_DRV_Init(&uartRxPin, &uartPinConf);
+  err = GPIO_DRV_Init(&uartTxPin, &uartPinConf);
+  if (err != ERR_OK) {
+    return err;
+  }
 
-  HAL_UART_SetWordLength(conf->word_length);
-  HAL_UART_SetParity(conf->parity);
-  HAL_UART_SetStopBits(conf->stop_bits);
-  HAL_UART_SetOversampling(conf->oversampling);
+  err = GPIO_DRV_Init(&uartRxPin, &uartPinConf);
+  if (err != ERR_OK) {
+    return err;
+  }
+
+  err = HAL_UART_SetWordLength(conf->word_length);
+  if (err != ERR_OK) {
+    return err;
+  }
+
+  err = HAL_UART_SetParity(conf->parity);
+  if (err != ERR_OK) {
+    return err;
+  }
+
+  err = HAL_UART_SetStopBits(conf->stop_bits);
+  if (err != ERR_OK) {
+    return err;
+  }
+
+  err = HAL_UART_SetOversampling(conf->oversampling);
+  if (err != ERR_OK) {
+    return err;
+  }
 
   // INFO: value is temporary until RCC module is developed
   uint32_t pclk = 16000000UL;
-  HAL_UART_SetBaudRate(pclk, conf->baudrate);
-  HAL_UART_SetMode(conf->mode);
+  err = HAL_UART_SetBaudRate(pclk, conf->baudrate);
+  if (err != ERR_OK) {
+    return err;
+  }
+
+  err = HAL_UART_SetMode(conf->mode);
+  if (err != ERR_OK) {
+    return err;
+  }
 
   if (conf->it_flags != UART_INTERRUPT_NO_IT) {
     NVIC_EnableIRQ(USART1_IRQn);
-
-    HAL_UART_EnableIT(conf->it_flags);
-  }
-  // Enable USART
-  HAL_UART_Enable();
-}
-
-/**
- * @brief  Transmits a single byte over the given USART peripheral.
- * @param[in] conf  Pointer to a USART_Config_t configuration structure.
- * @param[in] byte  Byte to transmit.
- * @param[in] len   Length of byte array to transmit
- * @retval None
- */
-void UART_DRV_Transmit(USART_Config_t *conf, const uint8_t *byte, size_t len) {
-  for (uint32_t iter = 0; iter < len; iter++) {
-    if (!RingBuf_IsFull(&uartTxRb)) {
-      RingBuf_Push(&uartTxRb, byte[iter]);
-      HAL_UART_EnableTxIRQ();
+    err = HAL_UART_EnableIT(conf->it_flags);
+    if (err != ERR_OK) {
+      return err;
     }
-    // TODO: Return error status if fulll
   }
+
+  return HAL_UART_Enable();
 }
 
-/**
- * @brief  Receives a single byte from the given USART peripheral.
- * @param[in] conf  Pointer to a USART_Config_t configuration structure.
- * @param[out] data Pointer to where received data will be saved.
- * @param[in] len   Length of data to be read.
- * @retval None
- */
-void UART_DRV_Receive(USART_Config_t *conf, uint8_t *data, size_t len) {
+error_t UART_DRV_Transmit(const uint8_t *byte, size_t len) {
+  error_t status = ERR_OK;
+
+  if (byte == NULL) {
+    return ERR_NULL_PTR;
+  }
 
   for (size_t iter = 0; iter < len; iter++) {
-    if (!RingBuf_IsEmpty(&uartRxRb)) {
-      RingBuf_Pop(&uartRxRb, &data[iter]);
+    if (RingBuf_IsFull(&uartTxRb)) {
+      status = ERR_BUFFER_FULL;
+      continue;
     }
-    // TODO: Treat Timeout use case when rx is empty
-    // TODO: Add status return
+    RingBuf_Push(&uartTxRb, byte[iter]);
+    HAL_UART_EnableTxIRQ();
   }
+  return status;
 }
 
-/**
- * @brief  Defines Interrupt Service Routine
- * @retval None
- */
+error_t UART_DRV_Receive(uint8_t *data, size_t len) {
+  if (data == NULL) {
+    return ERR_NULL_PTR;
+  }
+
+  for (size_t iter = 0; iter < len; iter++) {
+    if (RingBuf_IsEmpty(&uartRxRb)) {
+      return ERR_BUFFER_EMPTY;
+    }
+    RingBuf_Pop(&uartRxRb, &data[iter]);
+  }
+  return ERR_OK;
+}
+
 void USART1_IRQHandler(void) {
   uint8_t byte;
-  if (HAL_UART_IsTxReady()) {
+  bool ready = false;
+
+  HAL_UART_IsTxReady(&ready);
+  if (ready) {
     if (RingBuf_Pop(&uartTxRb, &byte)) {
       HAL_UART_WriteByte(byte);
     } else {
@@ -135,9 +163,9 @@ void USART1_IRQHandler(void) {
     }
   }
 
-  // Check RXNE bit status
-  if (HAL_UART_IsRxReady()) {
-    byte = HAL_UART_ReadByte();
+  HAL_UART_IsRxReady(&ready);
+  if (ready) {
+    HAL_UART_ReadByte(&byte);
     if (RingBuf_Push(&uartRxRb, byte) == 0) {
       uint8_t oldData;
       RingBuf_Pop(&uartRxRb, &oldData);
@@ -146,4 +174,5 @@ void USART1_IRQHandler(void) {
   }
 }
 
-/* Private functions --------------------------------------------------------*/
+/* Private functions
+ * -------------------------------------------------------------*/
