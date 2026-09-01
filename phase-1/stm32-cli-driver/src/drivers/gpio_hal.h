@@ -21,7 +21,7 @@ extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
-#include "../common/error.h"
+#include "error.h"
 #include "stm32f429xx.h"
 #include <stdint.h>
 

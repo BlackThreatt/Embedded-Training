@@ -49,8 +49,14 @@ error_t UART_DRV_Init(USART_Config_t *conf) {
     return ERR_NULL_PTR;
   }
 
-  RingBuf_Init(&uartRxRb);
-  RingBuf_Init(&uartTxRb);
+  err = RingBuf_Init(&uartRxRb);
+  if (err != ERR_OK) {
+    return err;
+  }
+  err = RingBuf_Init(&uartTxRb);
+  if (err != ERR_OK) {
+    return err;
+  }
 
   // Initialize USART1 GPIOA Clock Config
   RCC->AHB1ENR |= (1U << 0);
@@ -120,43 +126,69 @@ error_t UART_DRV_Init(USART_Config_t *conf) {
 
 error_t UART_DRV_Transmit(const uint8_t *byte, size_t len) {
   error_t status = ERR_OK;
+  error_t err;
+  bool full = false;
+  bool pushed = false;
 
   if (byte == NULL) {
     return ERR_NULL_PTR;
   }
 
   for (size_t iter = 0; iter < len; iter++) {
-    if (RingBuf_IsFull(&uartTxRb)) {
+    err = RingBuf_IsFull(&uartTxRb, &full);
+    if (err != ERR_OK) {
+      return err;
+    }
+    if (full) {
       status = ERR_BUFFER_FULL;
       continue;
     }
-    RingBuf_Push(&uartTxRb, byte[iter]);
-    HAL_UART_EnableTxIRQ();
+    err = RingBuf_Push(&uartTxRb, byte[iter], &pushed);
+    if (err != ERR_OK) {
+      return err;
+    }
+    err = HAL_UART_EnableTxIRQ();
+    (void)err;
   }
   return status;
 }
 
 error_t UART_DRV_Receive(uint8_t *data, size_t len) {
+  error_t status = ERR_OK;
+  error_t err;
+  bool empty = false;
+  bool popped = false;
+
   if (data == NULL) {
     return ERR_NULL_PTR;
   }
 
   for (size_t iter = 0; iter < len; iter++) {
-    if (RingBuf_IsEmpty(&uartRxRb)) {
+    err = RingBuf_IsEmpty(&uartRxRb, &empty);
+    if (err != ERR_OK) {
+      return err;
+    }
+    if (empty) {
       return ERR_BUFFER_EMPTY;
     }
-    RingBuf_Pop(&uartRxRb, &data[iter]);
+    err = RingBuf_Pop(&uartRxRb, &data[iter], &popped);
+    if (err != ERR_OK) {
+      return err;
+    }
   }
-  return ERR_OK;
+  return status;
 }
 
 void USART1_IRQHandler(void) {
   uint8_t byte;
   bool ready = false;
-
+  bool popped = false;
+  bool pushed = false;
+  /* NOTE: There's no error propagation in ISR */
   HAL_UART_IsTxReady(&ready);
   if (ready) {
-    if (RingBuf_Pop(&uartTxRb, &byte)) {
+    RingBuf_Pop(&uartTxRb, &byte, &popped);
+    if (popped) {
       HAL_UART_WriteByte(byte);
     } else {
       HAL_UART_DisableTxIRQ();
@@ -166,10 +198,11 @@ void USART1_IRQHandler(void) {
   HAL_UART_IsRxReady(&ready);
   if (ready) {
     HAL_UART_ReadByte(&byte);
-    if (RingBuf_Push(&uartRxRb, byte) == 0) {
+    RingBuf_Push(&uartRxRb, byte, &pushed);
+    if (!pushed) {
       uint8_t oldData;
-      RingBuf_Pop(&uartRxRb, &oldData);
-      RingBuf_Push(&uartRxRb, byte);
+      RingBuf_Pop(&uartRxRb, &oldData, &popped);
+      RingBuf_Push(&uartRxRb, byte, &pushed);
     }
   }
 }

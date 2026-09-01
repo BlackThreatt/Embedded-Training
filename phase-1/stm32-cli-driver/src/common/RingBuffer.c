@@ -1,9 +1,9 @@
 /**
  ******************************************************************************
- * @file           : RingBuffer.h
- * @brief          : Header file for RingBuffer.c
+ * @file           : RingBuffer.c
+ * @brief          : Lock-free single-producer/single-consumer ring buffer
  * @author         : Mohamed Ali BESSAIDI
- * @date           : 25 Aug 2026
+ * @date           : 1 Sept 2026
  ******************************************************************************
  * @attention
  *
@@ -15,6 +15,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "RingBuffer.h"
+#include <stddef.h>
 
 /* Private typedef -----------------------------------------------------------*/
 
@@ -24,71 +25,80 @@
 
 /* Private variables ---------------------------------------------------------*/
 
-/* Private function prototypes -----------------------------------------------*/
+/* Private function prototypes
+ * ------------------------------------------------*/
 
-/* Exported functions --------------------------------------------------------*/
+/* Exported functions
+ * ----------------------------------------------------------*/
 
-/**
- * @brief Initalizes ring buffer structure to null.
- * @param[in] rb Pointer to RingBuffer_t configuration structure.
- * @retval None
- */
-void RingBuf_Init(RingBuffer_t *rb) {
+error_t RingBuf_Init(RingBuffer_t *rb) {
+  if (rb == NULL) {
+    return ERR_NULL_PTR;
+  }
   rb->head = 0;
   rb->tail = 0;
+  return ERR_OK;
 }
 
-/**
- * @brief Writes byte element to a given ring buffer.
- * @param[in] rb Pointer to RingBuffer_t configuration structure.
- * @param[in] element Byte to be pushed to ring buffer.
- * @retval true of success, false otherwise
- */
-bool RingBuf_Push(RingBuffer_t *rb, uint8_t element) {
-  uint32_t head = rb->head;
+error_t RingBuf_Push(RingBuffer_t *rb, uint8_t element, bool *out_ok) {
+  uint32_t head;
+
+  if (rb == NULL || out_ok == NULL) {
+    return ERR_NULL_PTR;
+  }
+
+  head = rb->head;
   if ((head - rb->tail) >= RING_BUF_SIZE) {
-    return false; /* full */
+    *out_ok = false; /* full */
+    return ERR_OK;
   }
   rb->buf[head & RING_BUF_MASK] = element;
   rb->head = head + 1U;
-  return true;
+  *out_ok = true;
+  return ERR_OK;
 }
 
-/**
- * @brief Reads byte element from a given ring buffer.
- * @param[in] rb Pointer to RingBuffer_t configuration structure.
- * @param[out] element Pointer to byte that will store popped value.
- * @retval true if success, false otherwise
- */
-bool RingBuf_Pop(RingBuffer_t *rb, uint8_t *element) {
-  uint32_t tail = rb->tail;
+error_t RingBuf_Pop(RingBuffer_t *rb, uint8_t *element, bool *out_ok) {
+  uint32_t tail;
+
+  if (rb == NULL || element == NULL || out_ok == NULL) {
+    return ERR_NULL_PTR;
+  }
+
+  tail = rb->tail;
   if (rb->head == tail) {
-    return false; /* empty */
+    *out_ok = false; /* empty */
+    return ERR_OK;
   }
   *element = rb->buf[tail & RING_BUF_MASK];
   rb->tail = tail + 1U;
-  return true;
+  *out_ok = true;
+  return ERR_OK;
 }
 
-/**
- * @brief Reads the size of a given ring buffer.
- * @param[in] rb Pointer to RingBuffer_t configuration structure.
- * @retval size of ring buffer
- */
-uint32_t RingBuf_Count(const RingBuffer_t *rb) { return rb->head - rb->tail; }
-
-/**
- * @brief Checks whether ring buffer is empty.
- * @param[in] rb Pointer to RingBuffer_t configuration structure.
- * @retval true if empty, false otherwise
- */
-bool RingBuf_IsEmpty(const RingBuffer_t *rb) { return rb->head == rb->tail; }
-
-/**
- * @brief Checks whether ring buffer is full.
- * @param[in] rb Pointer to RingBuffer_t configuration structure.
- * @retval true if full, false otherwise
- */
-bool RingBuf_IsFull(const RingBuffer_t *rb) {
-  return (rb->head - rb->tail) >= RING_BUF_SIZE;
+error_t RingBuf_Count(const RingBuffer_t *rb, uint32_t *out_count) {
+  if (rb == NULL || out_count == NULL) {
+    return ERR_NULL_PTR;
+  }
+  *out_count = rb->head - rb->tail;
+  return ERR_OK;
 }
+
+error_t RingBuf_IsEmpty(const RingBuffer_t *rb, bool *out_empty) {
+  if (rb == NULL || out_empty == NULL) {
+    return ERR_NULL_PTR;
+  }
+  *out_empty = (rb->head == rb->tail);
+  return ERR_OK;
+}
+
+error_t RingBuf_IsFull(const RingBuffer_t *rb, bool *out_full) {
+  if (rb == NULL || out_full == NULL) {
+    return ERR_NULL_PTR;
+  }
+  *out_full = ((rb->head - rb->tail) >= RING_BUF_SIZE);
+  return ERR_OK;
+}
+
+/* Private functions
+ * -------------------------------------------------------------*/
