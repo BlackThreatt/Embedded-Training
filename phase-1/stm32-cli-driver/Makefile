@@ -24,6 +24,7 @@ MCU_FLAGS = \
 SRC_DIRS = \
 					 external/STM32F4xx_HAL_Driver/Src \
 					 src \
+					 external/printf-4.0.0
 
 INCLUDE_DIRS = \
 							src/ \
@@ -33,13 +34,14 @@ INCLUDE_DIRS = \
 							external/STM32F4xx_HAL_Driver/Inc \
 							external/STM32F4xx_HAL_Driver/Inc/Legacy \
 							external/CMSIS/Include \
-							external/CMSIS/Device/ST/STM32F4xx/Include
+							external/CMSIS/Device/ST/STM32F4xx/Include \
+							external/printf-4.0.0
 
 # Source Discovery
 C_SOURCES := $(shell find $(SRC_DIRS) -name '*.c')
 ASM_SOURCES := $(shell find $(SRC_DIRS) -name '*.s')
 
-# Object generation
+# Object generatior
 OBJECTS = $(patsubst %.c,$(BUILD_DIR)/%.o,$(C_SOURCES)) \
 					$(patsubst %.s,$(BUILD_DIR)/%.o,$(ASM_SOURCES))
 

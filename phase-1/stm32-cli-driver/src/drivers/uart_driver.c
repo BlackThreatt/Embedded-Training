@@ -180,31 +180,34 @@ error_t UART_DRV_Receive(uint8_t *data, size_t len) {
 }
 
 void USART1_IRQHandler(void) {
+  error_t err;
   uint8_t byte;
   bool ready = false;
   bool popped = false;
   bool pushed = false;
-  /* NOTE: There's no error propagation in ISR */
-  HAL_UART_IsTxReady(&ready);
+  /* NOTE: There's no error propagation in ISR, Errors are voided to clean
+   * terminal output*/
+  err = HAL_UART_IsTxReady(&ready);
   if (ready) {
-    RingBuf_Pop(&uartTxRb, &byte, &popped);
+    err = RingBuf_Pop(&uartTxRb, &byte, &popped);
     if (popped) {
-      HAL_UART_WriteByte(byte);
+      err = HAL_UART_WriteByte(byte);
     } else {
-      HAL_UART_DisableTxIRQ();
+      err = HAL_UART_DisableTxIRQ();
     }
   }
 
-  HAL_UART_IsRxReady(&ready);
+  err = HAL_UART_IsRxReady(&ready);
   if (ready) {
-    HAL_UART_ReadByte(&byte);
-    RingBuf_Push(&uartRxRb, byte, &pushed);
+    err = HAL_UART_ReadByte(&byte);
+    err = RingBuf_Push(&uartRxRb, byte, &pushed);
     if (!pushed) {
       uint8_t oldData;
-      RingBuf_Pop(&uartRxRb, &oldData, &popped);
-      RingBuf_Push(&uartRxRb, byte, &pushed);
+      err = RingBuf_Pop(&uartRxRb, &oldData, &popped);
+      err = RingBuf_Push(&uartRxRb, byte, &pushed);
     }
   }
+  (void)err;
 }
 
 /* Private functions

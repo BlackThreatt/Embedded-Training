@@ -1,10 +1,8 @@
+#include "common/logger.h"
 #include "drivers/uart_driver.h"
-#include "error.h"
+#include "logger.h"
 #include <stdint.h>
 #include <stm32f4xx.h>
-
-void api_uart_write(uint8_t *data, uint32_t len);
-void api_uart_read(uint8_t *data, uint32_t len);
 
 USART_Config_t uartConf;
 
@@ -24,19 +22,13 @@ int main(void) {
     return err;
   }
 
-  uint8_t buf[3] = {65, 66, 67};
-  api_uart_write(buf, 3);
+  // uint8_t buf[3] = {65, 66, 67};
+  // api_uart_write(buf, 3);
+  LOG_DEBUG("LOG_DEBUG TEST");
+  LOG_INFO("LOG_INFO TEST");
+  LOG_ERROR("LOG_ERROR TEST");
   // uint8_t recv[3];
   // api_uart_read(recv, 3);
   while (1) {
   }
-}
-
-void api_uart_write(uint8_t *data, uint32_t len) {
-  UART_DRV_Transmit(data, 3);
-  // TODO: add status return
-}
-void api_uart_read(uint8_t *data, uint32_t len) {
-  UART_DRV_Receive(data, len);
-  // TODO: add status return
 }
